@@ -20,11 +20,23 @@
             Customer ID to Transfer
         </label>
         <input type="text" id="customerIdInput" value="UNIQUE_CUST_ID_456"
-               class="w-full p-3 mb-6 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500">
+               class="w-full p-3 mb-4 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500">
 
-        <!-- STEP 1: Update this URL after saving website_b.html -->
-        <input type="text" id="websiteBUrl" value="REPLACE_ME_WITH_FULL_PATH_TO_website_b.html"
-               class="w-full p-2 mb-6 text-sm border border-red-500 rounded-lg bg-red-100 text-red-800">
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <button id="saveBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition">
+                Save ID
+            </button>
+            <button id="clearDataBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition">
+                Clear All Data
+            </button>
+            <button id="showSavedBtn" class="col-span-2 bg-amber-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition">
+                Show Saved Data
+            </button>
+        </div>
+
+        <!-- Website B URL -->
+        <input type="text" id="websiteBUrl" value="https://cybersecdes-bdbc8c.gitlab.io/"
+               class="w-full p-2 mb-6 text-sm border border-green-500 rounded-lg bg-green-50 text-green-800">
 
         <button id="goToWebsiteBBtn" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-indigo-700 transition duration-150 shadow-lg transform hover:scale-[1.02]">
             Redirect to Website B & Transfer ID
@@ -32,16 +44,64 @@
     </div>
 
     <script>
+        // Elements
         const goToWebsiteBBtn = document.getElementById('goToWebsiteBBtn');
         const customerIdInput = document.getElementById('customerIdInput');
         const websiteBUrlInput = document.getElementById('websiteBUrl');
+        const saveBtn = document.getElementById('saveBtn');
+        const showSavedBtn = document.getElementById('showSavedBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
 
-        goToWebsiteBBtn.onclick = () => {
+        // Save customer ID to localStorage
+        saveBtn.onclick = () => {
             const customerId = customerIdInput.value.trim();
+            if (customerId) {
+                localStorage.setItem('customer_id', customerId);
+                alert('Customer ID saved successfully!');
+            } else {
+                alert('Please enter a customer ID to save.');
+            }
+        };
+
+        // Clear all localStorage data
+        clearDataBtn.onclick = () => {
+            if (confirm('Are you sure you want to clear all saved data? This cannot be undone.')) {
+                localStorage.clear();
+                customerIdInput.value = '';
+                alert('All local data has been cleared.');
+            }
+        };
+
+        // Show saved data from localStorage
+        showSavedBtn.onclick = () => {
+            const savedData = {
+                customer_id: localStorage.getItem('customer_id') || 'No customer ID saved',
+                other_data: {}
+            };
+            
+            // Show all saved data in a formatted way
+            let message = 'Saved Data:\n\n';
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                message += `${key}: ${localStorage.getItem(key)}\n`;
+            }
+            
+            alert(message);
+        };
+
+        // Redirect to Website B with customer ID
+        goToWebsiteBBtn.onclick = () => {
+            // Get customer ID from localStorage or input field
+            let customerId = localStorage.getItem('customer_id') || customerIdInput.value.trim();
             const websiteBUrl = websiteBUrlInput.value.trim();
             
             if (websiteBUrl.includes('REPLACE_ME')) {
-                alert("SECURITY WARNING: You must replace the URL field with the full path to your local website_b.html file to test this locally.");
+                alert("SECURITY WARNING: You must replace the URL field with the full path to your website_b.html file.");
+                return;
+            }
+            
+            if (!customerId) {
+                alert("Please enter a customer ID and save it first.");
                 return;
             }
 

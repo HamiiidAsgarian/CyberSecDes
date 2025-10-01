@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Website A - Originator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="p-8 bg-gray-900 min-h-screen flex flex-col items-center justify-center">
+    
+    <div class="bg-gray-800 p-8 rounded-xl shadow-2xl w-full max-w-lg border-t-4 border-indigo-500">
+        <h1 class="text-3xl font-extrabold mb-4 text-white">Website A (Your First Business)</h1>
+        <p class="mb-6 text-gray-300">
+            This is the originating site. We will pass our Customer ID via the URL.
+        </p>
+        
+        <label for="customerIdInput" class="block text-sm font-medium text-indigo-300 mb-2">
+            Customer ID to Transfer
+        </label>
+        <input type="text" id="customerIdInput" value="UNIQUE_CUST_ID_456"
+               class="w-full p-3 mb-6 border border-gray-600 rounded-lg bg-gray-700 text-white focus:ring-indigo-500 focus:border-indigo-500">
+
+        <!-- STEP 1: Update this URL after saving website_b.html -->
+        <input type="text" id="websiteBUrl" value="REPLACE_ME_WITH_FULL_PATH_TO_website_b.html"
+               class="w-full p-2 mb-6 text-sm border border-red-500 rounded-lg bg-red-100 text-red-800">
+
+        <button id="goToWebsiteBBtn" class="w-full bg-indigo-600 text-white px-6 py-3 rounded-xl font-bold text-lg hover:bg-indigo-700 transition duration-150 shadow-lg transform hover:scale-[1.02]">
+            Redirect to Website B & Transfer ID
+        </button>
+    </div>
+
+    <script>
+        const goToWebsiteBBtn = document.getElementById('goToWebsiteBBtn');
+        const customerIdInput = document.getElementById('customerIdInput');
+        const websiteBUrlInput = document.getElementById('websiteBUrl');
+
+        goToWebsiteBBtn.onclick = () => {
+            const customerId = customerIdInput.value.trim();
+            const websiteBUrl = websiteBUrlInput.value.trim();
+            
+            if (websiteBUrl.includes('REPLACE_ME')) {
+                alert("SECURITY WARNING: You must replace the URL field with the full path to your local website_b.html file to test this locally.");
+                return;
+            }
+
+            if (!customerId) {
+                alert("Please enter a customer ID.");
+                return;
+            }
+
+            // Construct the final URL with the unique parameter
+            const trackingParam = "source_id"; 
+            const newUrl = `${websiteBUrl}?${trackingParam}=${encodeURIComponent(customerId)}&source=WebsiteA`;
+            
+            // Perform the redirection
+            window.location.href = newUrl; 
+        };
+    </script>
+</body>
+</html>
